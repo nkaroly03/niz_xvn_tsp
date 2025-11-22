@@ -62,6 +62,21 @@ source ~/ros2_ws/install/setup.bash
 ros2 run niz_xvn_tsp tsp_node --ros-args -p file_name:="/home/your_user_name/ros2_ws/src/niz_xvn_tsp/csv/test1.csv" -p population_size:=50
 ```
 
+You can also test it with a csv file from the csv directory by using launch:
+
+<details>
+<summary> Don't forget to source before ROS commands.</summary>
+
+```bash
+source ~/ros2_ws/install/setup.bash
+```
+
+</details>
+
+```r
+ros2 launch niz_xvn_tsp launch_example.launch.py
+```
+
 As soon as the program starts the solving algorithm also starts.
 
 Open rviz in a separate terminal, and add the MarkerArray topic under /marker_array_topic:
