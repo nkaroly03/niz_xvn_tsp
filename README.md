@@ -46,7 +46,7 @@ source ~/ros2_ws/install/setup.bash
 ros2 run niz_xvn_tsp tsp_node --ros-args -p file_name:="/home/your_user_name/ros2_ws/src/niz_xvn_tsp/csv/test1.csv"
 ```
 
-Also, there's an optional parameter "population_size", which is an and unsigned integer type that, if not specified, defaults to the number of coordinates found in the csv file. You can supply this parameter if you believe it'll have a positive impact on the result.
+Also, there's an optional parameter "population_size", which is an unsigned integer type that, if not specified, defaults to the number of coordinates found in the csv file. You can supply this parameter if you believe it'll have a positive impact on the result.
 With the optional parameter it would look like this:
 
 <details>
