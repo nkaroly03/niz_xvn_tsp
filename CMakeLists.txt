@@ -31,6 +31,7 @@ install(DIRECTORY launch
 
 install(TARGETS
 tsp_node
-DESTINATION lib/${PROJECT_NAME})
+DESTINATION lib/${PROJECT_NAME}
+)
 
 ament_package()

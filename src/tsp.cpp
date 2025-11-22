@@ -9,8 +9,11 @@
 
 class Solver : public rclcpp::Node{
     private:
-    using Vec2 = std::pair<double, double>;
-    using Population = std::pair<std::unique_ptr<size_t[]>, double>;
+    struct Vec2{ double x, y; };
+    struct Population{
+        std::unique_ptr<size_t[]> ids;
+        double cost;
+    };
 
     std::string m_file_name;
     std::vector<Vec2> m_coors;
@@ -36,35 +39,34 @@ class Solver : public rclcpp::Node{
         char c;
 
         while ((file >> x).get(c) >> y)
-            m_coors.emplace_back(x, y);
+            m_coors.push_back(Vec2{x, y});
     }
     void calculate_distances(){
         m_distances = std::make_unique<double[]>(m_coors.size() * m_coors.size());
 
         double *it = m_distances.get();
-        for (const Vec2 &coor1 : m_coors)
-            for (const Vec2 &coor2 : m_coors)
-                *it++ = std::hypot(coor2.first - coor1.first, coor2.second - coor1.second);
+        for (const Vec2 &v1 : m_coors)
+            for (const Vec2 &v2 : m_coors)
+                *it++ = std::hypot(v2.x - v1.x, v2.y - v1.y);
     }
 
     void timer_callback(){
-
     }
 
     public:
     Solver() : Node{"tsp_node"}{
         using namespace std::chrono_literals;
 
-        this->declare_parameter("file_name", "/home/giganibba840/ros2_ws/src/niz_xvn_tsp/csv/test.csv");
+        this->declare_parameter("file_name", "");
         this->get_parameter("file_name", m_file_name);
 
         read_file();
         calculate_distances();
-        
-        this->declare_parameter("population_size", m_coors.size());
+
+        this->declare_parameter("population_size", static_cast<int64_t>(m_coors.size()));
         this->get_parameter("population_size", m_population_size);
 
-        m_publisher = this->create_publisher<visualization_msgs::msg::MarkerArray>("marker_topic", 10);
+        m_publisher = this->create_publisher<visualization_msgs::msg::MarkerArray>("marker_array_topic", 10);
         m_timer = this->create_wall_timer(500ms, std::bind(&Solver::timer_callback, this));
     }
 };
