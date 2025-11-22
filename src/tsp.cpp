@@ -16,6 +16,8 @@ class Solver : public rclcpp::Node{
         double cost;
     };
 
+    static constexpr double M_MUTATION_RATIO = 0.2;
+
     std::string m_file_name;
     std::mt19937_64 m_rand;
     std::vector<Vec2> m_coors;
@@ -89,6 +91,12 @@ class Solver : public rclcpp::Node{
         }
 
         m_pop_buf.cost = calculate_cost(m_pop_buf.ids);
+    }
+    void mutate() noexcept{
+        if (static_cast<double>(m_rand() % 100) < M_MUTATION_RATIO * 100.0){
+            std::swap(m_pop_buf.ids[m_rand() % m_coors.size()], m_pop_buf.ids[m_rand() % m_coors.size()]);
+            m_pop_buf.cost = calculate_cost(m_pop_buf.ids);
+        }
     }
 
     void timer_callback(){
