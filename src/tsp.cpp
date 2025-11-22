@@ -70,6 +70,27 @@ class Solver : public rclcpp::Node{
         std::sort(&m_pops[0], &m_pops[m_population_size], [](const Population &p1, const Population &p2){ return p1.cost < p2.cost; });
     }
 
+    void crossover() noexcept{
+        size_t population_size_half = m_population_size / 2;
+        size_t pop_idx1 = m_rand() % population_size_half, pop_idx2 = population_size_half + m_rand() % population_size_half;
+        if (m_rand() % 2 == 0)
+            std::swap(pop_idx1, pop_idx2);
+        
+        const Population &p1 = m_pops[pop_idx1], &p2 = m_pops[pop_idx2];
+
+        size_t crossover_point = m_rand() % (m_coors.size() + 1);
+        std::copy(&p1.ids[0], &p1.ids[crossover_point], &m_pop_buf.ids[0]);
+
+        size_t i = 0;
+        while (crossover_point < m_coors.size()){
+            if (std::find(&m_pop_buf.ids[0], &m_pop_buf.ids[crossover_point], p2.ids[i]) == &m_pop_buf.ids[crossover_point])
+                m_pop_buf.ids[crossover_point++] = p2.ids[i];
+            ++i;
+        }
+
+        m_pop_buf.cost = calculate_cost(m_pop_buf.ids);
+    }
+
     void timer_callback(){
     }
 
