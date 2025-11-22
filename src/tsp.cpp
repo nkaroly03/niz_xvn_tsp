@@ -100,6 +100,90 @@ class Solver : public rclcpp::Node{
     }
 
     void timer_callback(){
+        crossover();
+        mutate();
+
+        if (m_pop_buf.cost < m_pops[0].cost){
+            std::copy(&m_pop_buf.ids[0], &m_pop_buf.ids[m_coors.size()], &m_pops[0].ids[0]);
+            m_pops[0].cost = m_pop_buf.cost;
+        }
+
+        size_t population_size_half = m_population_size / 2;
+        std::swap(m_pop_buf, m_pops[population_size_half + m_rand() % population_size_half]);
+        std::shuffle(&m_pop_buf.ids[0], &m_pop_buf.ids[m_coors.size()], m_rand);
+        m_pop_buf.cost = calculate_cost(m_pop_buf.ids);
+
+        if (m_pop_buf.cost < m_pops[0].cost){
+            std::copy(&m_pop_buf.ids[0], &m_pop_buf.ids[m_coors.size()], &m_pops[0].ids[0]);
+            m_pops[0].cost = m_pop_buf.cost;
+        }
+
+        std::swap(m_pop_buf, m_pops[population_size_half + m_rand() % population_size_half]);
+        std::shuffle(&m_pop_buf.ids[0], &m_pop_buf.ids[m_coors.size()], m_rand);
+        m_pop_buf.cost = calculate_cost(m_pop_buf.ids);
+
+        std::sort(&m_pops[0], &m_pops[m_population_size], [](const Population &p1, const Population &p2){ return p1.cost < p2.cost; });
+
+        visualization_msgs::msg::MarkerArray markers;
+        visualization_msgs::msg::Marker spheres, lines;
+
+        spheres.header.frame_id = "map";
+        spheres.ns = "spheres";
+        spheres.type = visualization_msgs::msg::Marker::SPHERE_LIST;
+        spheres.id = 0;
+        spheres.action = visualization_msgs::msg::Marker::ADD;
+        spheres.pose.orientation.x = 0.0;
+        spheres.pose.orientation.y = 0.0;
+        spheres.pose.orientation.z = 0.0;
+        spheres.pose.orientation.w = 0.0;
+
+        spheres.scale.x = 0.2;
+        spheres.scale.y = 0.2;
+        spheres.scale.z = 0.2;
+        
+        spheres.color.r = 1.0f;
+        spheres.color.g = 0.0f;
+        spheres.color.b = 0.0f;
+        spheres.color.a = 1.0f;
+
+        lines.header.frame_id = "map";
+        lines.ns = "lines";
+        lines.type = visualization_msgs::msg::Marker::LINE_STRIP;
+        lines.id = 1;
+        lines.action = visualization_msgs::msg::Marker::ADD;
+        lines.pose.orientation.x = 0.0;
+        lines.pose.orientation.y = 0.0;
+        lines.pose.orientation.z = 0.0;
+        lines.pose.orientation.w = 0.0;
+
+        lines.scale.x = 0.1;
+        
+        lines.color.r = 0.0f;
+        lines.color.g = 0.0f;
+        lines.color.b = 1.0f;
+        lines.color.a = 1.0f;
+
+        geometry_msgs::msg::Point p;
+        p.z = 0.0;
+        for (auto it = &m_pops[0].ids[0]; it != &m_pops[0].ids[m_coors.size()]; ++it){
+            p.x = m_coors[*it].x;
+            p.y = m_coors[*it].y;
+
+            spheres.points.push_back(p);
+            lines.points.push_back(p);
+        }
+
+        p.x = m_coors[m_pops[0].ids[0]].x;
+        p.y = m_coors[m_pops[0].ids[0]].y;
+        lines.points.push_back(p);
+
+        markers.markers.push_back(spheres);
+        markers.markers.push_back(lines);
+
+        // for (size_t i = 0; i < m_population_size; ++i)
+            // RCLCPP_INFO(this->get_logger(), "%lf", m_pops[0].cost);
+
+        m_publisher->publish(markers);
     }
 
     public:
@@ -122,7 +206,7 @@ class Solver : public rclcpp::Node{
         m_pop_buf.ids = std::make_unique<size_t[]>(m_coors.size());
 
         m_publisher = this->create_publisher<visualization_msgs::msg::MarkerArray>("marker_array_topic", 10);
-        m_timer = this->create_wall_timer(500ms, std::bind(&Solver::timer_callback, this));
+        m_timer = this->create_wall_timer(1ns, std::bind(&Solver::timer_callback, this));
     }
 };
 
