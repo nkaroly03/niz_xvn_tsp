@@ -98,7 +98,7 @@ ros2 run rviz2 rviz2
 
 Because the wall_timer time is set to 1ns it basically shows the greatest solutions it has found. If you also want to see how the solution gets better over time then increase the 1ns duration in the source code and rebuild the package. The time cannot be parameterized because in practice you would want to get the greatest result as soon as possible.
 
-![](img/result.png)
+![](img/result.gif)
 
 ## Diagram
 

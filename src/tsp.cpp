@@ -1,8 +1,10 @@
+#include <algorithm>
 #include <cmath>
 #include <fstream>
 #include <memory>
 #include <random>
 #include <string>
+#include <utility>
 #include <vector>
 
 #include "rclcpp/rclcpp.hpp"
@@ -51,7 +53,7 @@ class Solver : public rclcpp::Node{
     void calculate_distances(){
         m_distances = std::make_unique<double[]>(m_coors.size() * m_coors.size());
 
-        double *it = m_distances.get();
+        double *it = &m_distances[0];
         for (const auto &v1 : m_coors)
             for (const auto &v2 : m_coors)
                 *it++ = std::hypot(v2.x - v1.x, v2.y - v1.y);
@@ -61,6 +63,7 @@ class Solver : public rclcpp::Node{
         double cost = 0.0;
         for (size_t i = 0; i < m_coors.size() - 1; ++i)
             cost += m_distances[idxs[i] * m_coors.size() + idxs[i + 1]];
+        cost += m_distances[idxs[m_coors.size() - 1] * m_coors.size() + idxs[0]];
         return cost;
     }
     // creates a starting population
