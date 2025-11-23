@@ -59,7 +59,7 @@ class Solver : public rclcpp::Node{
                 *it++ = std::hypot(v2.x - v1.x, v2.y - v1.y);
     }
     
-    double calculate_cost(std::unique_ptr<size_t[]> &idxs) noexcept{
+    double calculate_cost(const std::unique_ptr<size_t[]> &idxs) const noexcept{
         double cost = 0.0;
         for (size_t i = 0; i < m_coors.size() - 1; ++i)
             cost += m_distances[idxs[i] * m_coors.size() + idxs[i + 1]];
@@ -230,6 +230,8 @@ class Solver : public rclcpp::Node{
 
         create_population();
         m_pop_buf.idxs = std::make_unique<size_t[]>(m_coors.size());
+
+        RCLCPP_INFO(this->get_logger(), "Solver initialized with {file_name : \"%s\"}, {population_size : %zu}", m_file_name.data(), m_population_size);
 
         m_publisher = this->create_publisher<visualization_msgs::msg::MarkerArray>("marker_array_topic", 10);
         m_timer = this->create_wall_timer(1ns, std::bind(&Solver::timer_callback, this));
