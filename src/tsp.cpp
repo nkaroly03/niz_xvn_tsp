@@ -46,7 +46,7 @@ class Solver : public rclcpp::Node{
         double x, y;
         char c;
 
-        while ((file >> x).get(c) >> y)
+        while (file >> x >> c >> y)
             m_coors.push_back(Vec2{x, y});
     }
     // calculates the distance between each city pair
