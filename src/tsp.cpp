@@ -131,8 +131,6 @@ class Solver : public rclcpp::Node{
 
         // swap again
         std::swap(m_pop_buf, m_pops[population_size_half + m_rand() % population_size_half]);
-        std::shuffle(&m_pop_buf.idxs[0], &m_pop_buf.idxs[m_coors.size()], m_rand);
-        m_pop_buf.cost = calculate_cost(m_pop_buf.idxs);
 
         std::sort(&m_pops[0], &m_pops[m_population_size], [](const Population &p1, const Population &p2){ return p1.cost < p2.cost; });
 
